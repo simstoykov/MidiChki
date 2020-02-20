@@ -59,6 +59,25 @@ def handle_note_pressed(note, velocity):
     lights[rotating].fade(rel_vel, 0, 0.1)
 
 
+def read_to_string(read, cur_time):
+    return f"{read[0][0]},{read[0][1]},{read[0][2]},{read[0][3]},{read[1]},{cur_time}"
+
+write_path = "/media/pi/SS Backup/midichki/simefile.txt" # "/home/pi/Documents/Developing/MidiChki/dontgitit/simefile.txt"
+def persist_stuff(read, cur_time):
+    with open(write_path, 'a+') as the_file:
+        the_file.write(read_to_string(read, cur_time) + "\n")
+
+
+def midi_event(read, cur_time):
+    data, timestamp = read
+    status, note, velocity, idk = data
+
+    if status == 144:
+        handle_note_pressed(note, velocity)
+
+    persist_stuff(read, cur_time)
+
+
 # Set global state
 lights = [eh.light.yellow, eh.light.blue, eh.light.red, eh.light.green]
 rotating = 0
@@ -72,7 +91,7 @@ if __name__ == '__main__':
 
     logging.info("Indefinitely listening for notes...")
     while True:
-        reads = roland.read(1)
+        reads = roland.read(8)
         cur_time = time.time()
 
         if len(reads) == 0:
@@ -90,10 +109,5 @@ if __name__ == '__main__':
             last_note_time = cur_time
 
             for read in reads:
-                data, timestamp = read
-                status, note, velocity, idk = data
-
-                if status == 144:
-                    handle_note_pressed(note, velocity)
-
+                midi_event(read, cur_time)
 
