@@ -1,21 +1,26 @@
 import logging
+import time
 import explorerhat as eh
-import pygame.midi as midi
+import pygame.midi
 from random import random
+import importlib
+import sys
 
-midi.init()
-
+logging.basicConfig(level=logging.INFO)
 
 def random_between(start, to):
     return int(start + random() * (to - start))
 
 
 def find_roland_id():
-    device_cnt = midi.get_count()
+    pygame.midi.quit()
+    pygame.midi.init()
+
+    device_cnt = pygame.midi.get_count()
     logging.info(f"{device_cnt} USB devices connected...")
 
     for i in range(device_cnt):
-        info = midi.get_device_info(i)
+        info = pygame.midi.get_device_info(i)
 
         name = str(info[1])
         is_input = info[2]
@@ -27,6 +32,18 @@ def find_roland_id():
 
     logging.warning("Couldn't find Roland...")
     raise FileNotFoundError("Couldn't find Roland...")
+
+
+def wait_for_roland():
+    while True:
+        try:
+            roland_id = find_roland_id()
+            break
+        except FileNotFoundError as e:
+            logging.info("Retrying...")
+            time.sleep(1)
+
+    return pygame.midi.Input(roland_id)
 
 
 def handle_note_pressed(note, velocity):
@@ -49,22 +66,34 @@ rotating = 0
 if __name__ == '__main__':
     logging.info("Hello!")
 
-    while True:
-        try:
-            roland_id = find_roland_id()
-            break
-        except FileNotFoundError as e:
-            logging.info("Retrying...")
+    roland = wait_for_roland()
 
-    roland = midi.Input(roland_id)
+    last_note_time = time.time()
 
     logging.info("Indefinitely listening for notes...")
     while True:
         reads = roland.read(1)
+        cur_time = time.time()
 
-        for read in reads:
-            data, timestamp = read
-            status, note, velocity, idk = data
+        if len(reads) == 0:
+            elapsed = cur_time - last_note_time
+            if elapsed > 1:
+                try:
+                    roland.close()
+                except Exception:
+                    logging.info("Roland was indeed detached")
+                    raise Exception("Exiting... Start me again!")
 
-            if status == 144:
-                handle_note_pressed(note, velocity)
+                roland = wait_for_roland()
+                last_note_time = cur_time
+        else:
+            last_note_time = cur_time
+
+            for read in reads:
+                data, timestamp = read
+                status, note, velocity, idk = data
+
+                if status == 144:
+                    handle_note_pressed(note, velocity)
+
+

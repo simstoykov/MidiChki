@@ -1,0 +1,14 @@
+[Unit]
+Description=Midi listener for my Roland keyboard
+After=multi-user.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart= /home/pi/Documents/Developing/MidiChki/venv37/bin/python /home/pi/Documents/Developing/MidiChki/playing.py
+StandardInput=tty-force
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
