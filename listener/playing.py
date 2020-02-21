@@ -3,10 +3,9 @@ import time
 import explorerhat as eh
 import pygame.midi
 from random import random
-import importlib
-import sys
 
 logging.basicConfig(level=logging.INFO)
+
 
 def random_between(start, to):
     return int(start + random() * (to - start))
@@ -62,7 +61,10 @@ def handle_note_pressed(note, velocity):
 def read_to_string(read, cur_time):
     return f"{read[0][0]},{read[0][1]},{read[0][2]},{read[0][3]},{read[1]},{cur_time}"
 
-write_path = "/media/pi/SS Backup/midichki/simefile.txt" # "/home/pi/Documents/Developing/MidiChki/dontgitit/simefile.txt"
+
+write_path = "/media/pi/SS Backup/midichki/simefile.txt"  # "/home/pi/Documents/Developing/MidiChki/dontgitit/simefile.txt"
+
+
 def persist_stuff(read, cur_time):
     with open(write_path, 'a+') as the_file:
         the_file.write(read_to_string(read, cur_time) + "\n")
@@ -110,4 +112,3 @@ if __name__ == '__main__':
 
             for read in reads:
                 midi_event(read, cur_time)
-
