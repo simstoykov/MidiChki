@@ -65,8 +65,8 @@ def read_to_string(read, cur_time):
     return f"{read[0][0]},{read[0][1]},{read[0][2]},{read[0][3]},{read[1]},{cur_time}"
 
 
-write_path = "/media/pi/SS Backup/midichki/simefile.txt"
-# write_path = "/home/pi/Documents/Developing/MidiChki/dontgitit/simefile.txt"
+# write_path = "/media/pi/SS Backup/midichki/simefile.txt"
+write_path = "/home/pi/Documents/Developing/MidiChki/dontgitit/simefile.txt"
 def persist_stuff(strval):
     with open(write_path, 'a+') as the_file:
         the_file.write(strval + "\n")
@@ -105,6 +105,9 @@ if __name__ == '__main__':
     logging.info("Indefinitely listening for notes...")
     while True:
         reads = roland.read(8)
+        # reads = [[[144, 2, 3, 4], 5]]
+        time.sleep(0.01)
+
         cur_time = time.time()
 
         if len(reads) == 0:
@@ -122,3 +125,5 @@ if __name__ == '__main__':
             last_note_time = cur_time
             for read in reads:
                 midi_event(read, cur_time)
+
+
