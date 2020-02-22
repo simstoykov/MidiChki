@@ -24,6 +24,14 @@ app.get('/getAll', (req, res) => {
   sendResponse(res, cyclicBuffer.readAll());
 });
 
+app.get('/getFrom/:after', (req, res) => {
+  const after = req.params.after;
+  const notes = cyclicBuffer.readAll().filter(val => val[5] > after);
+
+  logger.info(`Sending notes after ${after}, size = ${notes.length}`);
+  sendResponse(res, notes);
+});
+
 app.post('/postNotes', (req, res) => {
   const receivedData = req.body;
   logger.info('Got ' + req.body + ', demek:: ' + JSON.stringify(receivedData));

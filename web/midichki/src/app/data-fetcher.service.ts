@@ -11,4 +11,8 @@ export class DataFetcherService {
   public getAll() {
     return this.http.get(`${this.rootUrl}/getAll`);
   }
+
+  public getAfter(after: number) {
+    return this.http.get(`${this.rootUrl}/getFrom/${after}`);
+  }
 }
