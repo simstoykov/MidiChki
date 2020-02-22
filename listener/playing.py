@@ -3,8 +3,10 @@ import time
 import explorerhat as eh
 import pygame.midi
 from random import random
-import requests
+from concurrent.futures import ProcessPoolExecutor
+from requests_futures.sessions import FuturesSession
 
+session = FuturesSession(executor=ProcessPoolExecutor(max_workers=3))
 logging.basicConfig(level=logging.INFO)
 
 
@@ -69,11 +71,13 @@ def persist_stuff(strval):
     with open(write_path, 'a+') as the_file:
         the_file.write(strval + "\n")
 
+
 # upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
 upload_url = "http://192.168.43.223:8080/postNotes"
 def upload_stuff(reads):
     logging.info(f"Uploading {len(reads)} values to {upload_url}")
-    requests.post(upload_url, json=reads)
+    session.post(upload_url, json=reads)
+
 
 def midi_event(read, cur_time):
     data, timestamp = read
