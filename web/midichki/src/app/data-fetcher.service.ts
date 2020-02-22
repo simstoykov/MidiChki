@@ -5,7 +5,7 @@ import { HttpClient } from "@angular/common/http";
   providedIn: "root"
 })
 export class DataFetcherService {
-  rootUrl = "https://mighty-island-21925.herokuapp.com";
+  rootUrl = "http://localhost:8080"; // "https://mighty-island-21925.herokuapp.com";
   constructor(private http: HttpClient) {}
 
   public getAll() {
