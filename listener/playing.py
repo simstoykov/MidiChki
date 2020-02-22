@@ -72,8 +72,8 @@ def persist_stuff(strval):
         the_file.write(strval + "\n")
 
 
-# upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
-upload_url = "http://192.168.43.223:8080/postNotes"
+upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
+# upload_url = "http://192.168.43.223:8080/postNotes"
 def upload_stuff(reads):
     logging.info(f"Uploading {len(reads)} values to {upload_url}")
     session.post(upload_url, json=reads)
@@ -88,7 +88,6 @@ def midi_event(read, cur_time):
 
     strval = read_to_string(read, cur_time)
     persist_stuff(strval)
-    upload_stuff([read[0] + [read[1], cur_time]])
 
 
 # Set global state
@@ -104,9 +103,10 @@ if __name__ == '__main__':
 
     logging.info("Indefinitely listening for notes...")
     while True:
-        reads = roland.read(8)
+        reads = roland.read(1000)
         # reads = [[[144, 2, 3, 4], 5]]
-        time.sleep(0.01)
+        time.sleep(1)
+        logging.info(f"Read {len(reads) stuff}")
 
         cur_time = time.time()
 
@@ -126,4 +126,5 @@ if __name__ == '__main__':
             for read in reads:
                 midi_event(read, cur_time)
 
+            upload_stuff(list(map(lambda read: read[0] + [read[1], cur_time], reads)))
 
