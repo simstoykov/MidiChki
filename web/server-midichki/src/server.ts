@@ -5,7 +5,7 @@ import CyclicBuffer from './cyclic_buffer';
 import config from './config';
 
 const app = express();
-const port = 8080; // default port to listen
+const port = process.env.PORT || 8080; // default port to listen
 const cyclicBuffer = new CyclicBuffer(config.notesBufferSize);
 
 app.use(bodyParser.json());
@@ -26,7 +26,7 @@ app.get('/getAll', (req, res) => {
 
 app.post('/postNotes', (req, res) => {
   const receivedData = req.body;
-  logger.info('Got ' + JSON.stringify(receivedData));
+  logger.info('Got ' + req.body + ', demek:: ' + JSON.stringify(receivedData));
 
   cyclicBuffer.addMultiple(receivedData);
   sendResponse(res, 'Thanks');

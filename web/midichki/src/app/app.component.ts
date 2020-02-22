@@ -44,7 +44,7 @@ export class AppComponent {
     this.dataFetcherService.getAll().subscribe((notes: number[][]) => {
       this.fetchedData = notes;
 
-      const startTime = Tone.context.now() + 1;
+      const startTime = Tone.context.now();
       const firstTime = notes[0][5];
       console.log("The starting time is " + firstTime);
 

@@ -4,10 +4,8 @@
   "description": "A web backend for the midichki project",
   "main": "dist/server.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
-    "prestart": "npm run build",
-    "start": "node .",
+    "start": "node dist/server.js",
     "test": "mocha -r ts-node/register src/*spec.ts"
   },
   "author": "Simeon Stoykov",
