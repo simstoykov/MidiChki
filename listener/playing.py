@@ -65,14 +65,14 @@ def read_to_string(read, cur_time):
 
 write_path = "/media/pi/SS Backup/midichki/simefile.txt"
 # write_path = "/home/pi/Documents/Developing/MidiChki/dontgitit/simefile.txt"
-def persist_stuff(read, cur_time):
+def persist_stuff(strval):
     with open(write_path, 'a+') as the_file:
-        the_file.write(read_to_string(read, cur_time) + "\n")
+        the_file.write(strval + "\n")
 
 # upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
 upload_url = "http://192.168.43.223:8080/postNotes"
 def upload_stuff(reads):
-    logging.info(f"Uploading " + len(reads) + " values to " + upload_url)
+    logging.info(f"Uploading {len(reads)} values to {upload_url}")
     requests.post(upload_url, json=reads)
 
 def midi_event(read, cur_time):
@@ -82,7 +82,9 @@ def midi_event(read, cur_time):
     if status == 144:
         handle_note_pressed(note, velocity)
 
-    persist_stuff(read, cur_time)
+    strval = read_to_string(read, cur_time)
+    persist_stuff(strval)
+    upload_stuff([read[0] + [read[1], cur_time]])
 
 
 # Set global state
@@ -114,6 +116,5 @@ if __name__ == '__main__':
                 last_note_time = cur_time
         else:
             last_note_time = cur_time
-            upload_stuff(reads)
             for read in reads:
                 midi_event(read, cur_time)
