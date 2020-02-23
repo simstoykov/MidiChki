@@ -10,14 +10,17 @@ import Tone from "tone";
 export class AppComponent {
   title = "midichki";
 
+  tunedIn = 0;
+
   firstMidiTime = 0;
   lastMidiTimePlayed = 0;
   initialToneTime = 0;
+  bufferDelaySecs = 20;
 
   fetchedData = null;
   instrument = new Tone.Sampler(
     {
-      C5: "C5.wav"
+      A4: "A4.wav"
     },
     {
       baseUrl: "assets/audio/",
@@ -28,21 +31,23 @@ export class AppComponent {
 
   constructor(private dataFetcherService: DataFetcherService) {}
 
-  playNote(
-    status: number,
-    frequency: number,
-    delay: number,
-    velocity: number,
-    epochTime: number
-  ) {
-    this.lastPlayed = epochTime;
+  playNote(status: number, frequency: number, delay: number, velocity: number) {
+    const afterBufDelay = delay + this.bufferDelaySecs;
 
     if (status === 144) {
-      console.log("Attacking frequency " + frequency + " with delay " + delay);
-      this.instrument.triggerAttack(frequency, Tone.Time(delay), velocity);
+      console.log(
+        "Attacking frequency " + frequency + " with delay " + afterBufDelay
+      );
+      this.instrument.triggerAttack(
+        frequency,
+        Tone.Time(afterBufDelay),
+        velocity
+      );
     } else if (status === 128) {
-      console.log("Releasing frequency " + frequency + " with delay " + delay);
-      this.instrument.triggerRelease(frequency, Tone.Time(delay));
+      console.log(
+        "Releasing frequency " + frequency + " with delay " + afterBufDelay
+      );
+      this.instrument.triggerRelease(frequency, Tone.Time(afterBufDelay));
     } else {
       console.log("Unknown event " + status);
     }
@@ -64,11 +69,18 @@ export class AppComponent {
           return;
         }
 
-        // If I haven't played for 20s, don't wait for it - start right away (or after 5s)
-        if (notes[0][4] - this.lastMidiTimePlayed > 20) {
-          this.firstMidiTime = notes[0][4] - 5;
+        // If I haven't played for 20s,
+        if (notes[0][4] - this.lastMidiTimePlayed > 20 * 1000) {
+          console.log(
+            "Resetting time because we haven't played for the past " +
+              (notes[0][4] - this.lastMidiTimePlayed) +
+              " ms"
+          );
+          // Start playing now (or 5 secs later)
+          this.firstMidiTime = notes[0][4];
           this.initialToneTime = Tone.context.now();
         }
+        this.lastMidiTimePlayed = notes[notes.length - 1][4];
         // console.log("The starting time is " + this.firstMidiTime);
 
         for (const note of notes) {
@@ -76,14 +88,13 @@ export class AppComponent {
 
           const midiDelay = (note[4] - this.firstMidiTime) / 1000;
           console.log("Delay is " + midiDelay);
-          this.lastMidiTimePlayed = midiDelay;
 
+          this.lastPlayed = note[5];
           this.playNote(
             Math.trunc(note[0]),
             this.convertToNote(note[1]),
             this.initialToneTime + midiDelay,
-            note[2] / 128,
-            note[5]
+            note[2] / 128
           );
         }
       });
@@ -91,14 +102,21 @@ export class AppComponent {
 
   async subscribeToMusic() {
     await Tone.start();
-
     while (true) {
       await this.onClickMe();
-      await this.delay(1000);
+      await this.delay((this.bufferDelaySecs * 1000) / 3);
     }
   }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  clickChangeDelay(value: string) {
+    console.log("Changing delay to " + value);
+    this.bufferDelaySecs = parseInt(value);
+  }
+
+  clickTuneIn() {
+    this.tunedIn = 1;
     this.subscribeToMusic();
   }
 
