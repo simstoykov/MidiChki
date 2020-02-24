@@ -15,12 +15,12 @@ export class AppComponent {
   firstMidiTime = 0;
   lastMidiTimePlayed = 0;
   initialToneTime = 0;
-  bufferDelaySecs = 20;
+  bufferDelaySecs = 10;
 
   fetchedData = null;
   instrument = new Tone.Sampler(
     {
-      A4: "A4.wav"
+      A3: "A4.wav"
     },
     {
       baseUrl: "assets/audio/",
@@ -30,6 +30,41 @@ export class AppComponent {
   lastPlayed = 0;
 
   constructor(private dataFetcherService: DataFetcherService) {}
+
+  toBeReleased = [];
+  pedalSustain = false;
+  releaseEvent(frequency: number, afterBufDelay: number, forReal = false) {
+    if (this.pedalSustain) {
+      this.toBeReleased.push(frequency);
+    } else {
+      if (forReal) {
+        this.releaseNote(frequency, afterBufDelay);
+      } else {
+        setTimeout(() => {
+          this.releaseEvent(frequency, afterBufDelay, true);
+        }, 10);
+      }
+    }
+  }
+
+  releaseNote(frequency: number, afterBufDelay: number) {
+    console.log(
+      "Releasing frequency " + frequency + " with delay " + afterBufDelay
+    );
+
+    this.instrument.triggerRelease(frequency, Tone.Time(afterBufDelay));
+  }
+
+  pedalEvent(velocity: number, afterBufDelay: number) {
+    if (velocity === 0) {
+      console.log("Pedal released - releasing all the notes");
+
+      this.pedalSustain = false;
+      this.toBeReleased.forEach(note => this.releaseNote(note, afterBufDelay));
+    } else {
+      this.pedalSustain = true;
+    }
+  }
 
   playNote(status: number, frequency: number, delay: number, velocity: number) {
     const afterBufDelay = delay + this.bufferDelaySecs;
@@ -44,10 +79,9 @@ export class AppComponent {
         velocity
       );
     } else if (status === 128) {
-      console.log(
-        "Releasing frequency " + frequency + " with delay " + afterBufDelay
-      );
-      this.instrument.triggerRelease(frequency, Tone.Time(afterBufDelay));
+      this.releaseEvent(frequency, afterBufDelay);
+    } else if (status == 176) {
+      this.pedalEvent(velocity, afterBufDelay);
     } else {
       console.log("Unknown event " + status);
     }
