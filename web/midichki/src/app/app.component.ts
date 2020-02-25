@@ -1,6 +1,8 @@
 import { Component } from "@angular/core";
 import { DataFetcherService } from "./data-fetcher.service";
 import Tone from "tone";
+import DataHolder from "./dataholder";
+import { Data } from "@angular/router";
 
 @Component({
   selector: "app-root",
@@ -9,6 +11,7 @@ import Tone from "tone";
 })
 export class AppComponent {
   title = "midichki";
+  RELEASE_PEDAL_DELAY_S = 0.15;
 
   tunedIn = 0;
 
@@ -33,26 +36,28 @@ export class AppComponent {
 
   toBeReleased = [];
   pedalSustain = false;
+
+  sideBuffer: DataHolder[] = [];
+  releaseIntent = [];
+
   releaseEvent(frequency: number, afterBufDelay: number, forReal = false) {
     if (this.pedalSustain) {
+      // If the pedal is pushed, delay release
       this.toBeReleased.push(frequency);
     } else {
-      if (forReal) {
-        this.releaseNote(frequency, afterBufDelay);
-      } else {
-        setTimeout(() => {
-          this.releaseEvent(frequency, afterBufDelay, true);
-        }, 10);
-      }
+      this.releaseNote(frequency, afterBufDelay);
     }
   }
 
   releaseNote(frequency: number, afterBufDelay: number) {
-    console.log(
-      "Releasing frequency " + frequency + " with delay " + afterBufDelay
-    );
+    if (this.releaseIntent[frequency]) {
+      // Only delete if it was not activated in the mean time
+      console.log(
+        "Releasing frequency " + frequency + " with delay " + afterBufDelay
+      );
 
-    this.instrument.triggerRelease(frequency, Tone.Time(afterBufDelay));
+      this.instrument.triggerRelease(frequency, Tone.Time(afterBufDelay));
+    }
   }
 
   pedalEvent(velocity: number, afterBufDelay: number) {
@@ -61,29 +66,60 @@ export class AppComponent {
 
       this.pedalSustain = false;
       this.toBeReleased.forEach(note => this.releaseNote(note, afterBufDelay));
+      this.toBeReleased = [];
     } else {
       this.pedalSustain = true;
     }
   }
 
-  playNote(status: number, frequency: number, delay: number, velocity: number) {
-    const afterBufDelay = delay + this.bufferDelaySecs;
+  handleEvent(dataHolder: DataHolder) {
+    const afterBufDelay = dataHolder.delay + this.bufferDelaySecs;
 
-    if (status === 144) {
+    if (dataHolder.status === 144) {
       console.log(
-        "Attacking frequency " + frequency + " with delay " + afterBufDelay
+        "Attacking frequency " +
+          dataHolder.frequency +
+          " with delay " +
+          afterBufDelay
       );
+
+      this.releaseIntent[dataHolder.frequency] = false;
       this.instrument.triggerAttack(
-        frequency,
+        dataHolder.frequency,
         Tone.Time(afterBufDelay),
-        velocity
+        dataHolder.velocity
       );
-    } else if (status === 128) {
-      this.releaseEvent(frequency, afterBufDelay);
-    } else if (status == 176) {
-      this.pedalEvent(velocity, afterBufDelay);
+    } else if (dataHolder.status === 128) {
+      this.releaseEvent(dataHolder.frequency, afterBufDelay);
+    } else if (dataHolder.status === 176) {
+      this.pedalEvent(dataHolder.velocity, afterBufDelay);
     } else {
       console.log("Unknown event " + status);
+    }
+  }
+
+  midiEventYey(dataHolder: DataHolder) {
+    while (
+      this.sideBuffer.length > 0 &&
+      this.sideBuffer[0].delay < dataHolder.delay
+    ) {
+      const value = this.sideBuffer.shift();
+      this.handleEvent(value);
+    }
+
+    if (dataHolder.status === 128) {
+      // Postpone releasing with RELEASE_PEDAL_DELAY_S seconds
+      this.releaseIntent[dataHolder.frequency] = true;
+      this.sideBuffer.push(
+        new DataHolder(
+          dataHolder.status,
+          dataHolder.frequency,
+          dataHolder.delay + this.RELEASE_PEDAL_DELAY_S,
+          dataHolder.velocity
+        )
+      );
+    } else {
+      this.handleEvent(dataHolder);
     }
   }
 
@@ -124,12 +160,19 @@ export class AppComponent {
           console.log("Delay is " + midiDelay);
 
           this.lastPlayed = note[5];
-          this.playNote(
-            Math.trunc(note[0]),
-            this.convertToNote(note[1]),
-            this.initialToneTime + midiDelay,
-            note[2] / 128
+          this.midiEventYey(
+            new DataHolder(
+              Math.trunc(note[0]),
+              this.convertToNote(note[1]),
+              this.initialToneTime + midiDelay,
+              note[2] / 128
+            )
           );
+        }
+
+        // Process remaining release events
+        while (this.sideBuffer.length > 0) {
+          this.handleEvent(this.sideBuffer.shift());
         }
       });
   }
@@ -145,8 +188,15 @@ export class AppComponent {
   ngOnInit() {}
 
   clickChangeDelay(value: string) {
-    console.log("Changing delay to " + value);
-    this.bufferDelaySecs = parseInt(value);
+    const numVal = parseInt(value);
+
+    if (numVal < 1) {
+      alert("Can't set delay to less than 1");
+      return;
+    }
+
+    this.bufferDelaySecs = numVal;
+    console.log("Changed delay to " + this.bufferDelaySecs);
   }
 
   clickTuneIn() {
