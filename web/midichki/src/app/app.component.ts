@@ -1,8 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
 import { DataFetcherService } from "./data-fetcher.service";
 import Tone from "tone";
 import DataHolder from "./dataholder";
 import { Data } from "@angular/router";
+import { PianoComponent } from "./piano/piano.component";
 
 @Component({
   selector: "app-root",
@@ -10,6 +11,8 @@ import { Data } from "@angular/router";
   styleUrls: ["./app.component.css"]
 })
 export class AppComponent {
+  @ViewChild("piano", { static: false }) childPiano: PianoComponent;
+
   title = "midichki";
   RELEASE_PEDAL_DELAY_S = 0.15;
 
@@ -30,7 +33,7 @@ export class AppComponent {
       release: 1
     }
   ).toMaster();
-  lastPlayed = 0;
+  lastPlayed = new Date().getTime() / 1000 - 10;
 
   constructor(private dataFetcherService: DataFetcherService) {}
 
@@ -44,8 +47,20 @@ export class AppComponent {
     if (this.pedalSustain) {
       // If the pedal is pushed, delay release
       this.toBeReleased.push(frequency);
+
+      this.childPiano.halfPressIn(
+        Tone.Frequency(frequency).toMidi(),
+        afterBufDelay,
+        Tone.context.now()
+      );
     } else {
       this.releaseNote(frequency, afterBufDelay);
+
+      this.childPiano.unPressIn(
+        Tone.Frequency(frequency).toMidi(),
+        afterBufDelay,
+        Tone.context.now()
+      );
     }
   }
 
@@ -57,6 +72,12 @@ export class AppComponent {
       );
 
       this.instrument.triggerRelease(frequency, Tone.Time(afterBufDelay));
+
+      this.childPiano.unPressIn(
+        Tone.Frequency(frequency).toMidi(),
+        afterBufDelay,
+        Tone.context.now()
+      );
     }
   }
 
@@ -88,6 +109,12 @@ export class AppComponent {
         dataHolder.frequency,
         Tone.Time(afterBufDelay),
         dataHolder.velocity
+      );
+      this.childPiano.pressIn(
+        Tone.Frequency(dataHolder.frequency).toMidi(),
+        dataHolder.velocity,
+        afterBufDelay,
+        Tone.context.now()
       );
     } else if (dataHolder.status === 128) {
       this.releaseEvent(dataHolder.frequency, afterBufDelay);

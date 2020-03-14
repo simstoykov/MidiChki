@@ -1,0 +1,14 @@
+.flex-container {
+  display: flex;
+  align-items: stretch;
+  flex-flow: row nowrap;
+  width: 100%;
+}
+
+.piano-container {
+  display: grid;
+  grid-template-columns: repeat(56, 1fr);
+  background-color: cornsilk;
+  height: 100px;
+  width: 100%;
+}
