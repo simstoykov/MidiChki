@@ -103,16 +103,16 @@ if __name__ == '__main__':
 
     logging.info("Indefinitely listening for notes...")
     while True:
-        reads = roland.read(1000)
+        reads = roland.read(100)
         # reads = [[[144, 2, 3, 4], 5]]
         time.sleep(1)
-        logging.info(f"Read {len(reads) stuff}")
+        logging.info(f"Read {len(reads)} stuff")
 
         cur_time = time.time()
 
         if len(reads) == 0:
             elapsed = cur_time - last_note_time
-            if elapsed > 1:
+            if elapsed > 5:
                 try:
                     roland.close()
                 except Exception:
