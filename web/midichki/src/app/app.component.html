@@ -1,3 +1,22 @@
-<h1>{{ title }}</h1>
-<p *ngIf="fetchedData">Data was fetched!</p>
-<button (click)="onClickMe()">Click me!</button>
+<div class="globalContainer">
+  <h1>Simi Radio</h1>
+
+  <div *ngIf="!tunedIn" class="horContainer" style="width: 100px;">
+    <button (click)="clickTuneIn()">Tune in!</button>
+  </div>
+
+  <div *ngIf="tunedIn" class="horContainer">
+    <input
+      #inpDelaySecs
+      class="element"
+      type="number"
+      value="{{ bufferDelaySecs }}"
+    />
+    <button (click)="clickChangeDelay(inpDelaySecs.value)" class="element">
+      Set buffer delay (seconds)
+    </button>
+  </div>
+  <div class="horContainer">
+    <app-piano #piano class="fullWidth"> </app-piano>
+  </div>
+</div>

@@ -5,10 +5,15 @@ import { HttpClient } from "@angular/common/http";
   providedIn: "root"
 })
 export class DataFetcherService {
-  rootUrl = "http://localhost:8080"; // "https://mighty-island-21925.herokuapp.com";
+  // rootUrl = "http://localhost:8080";
+  rootUrl = "https://mighty-island-21925.herokuapp.com";
   constructor(private http: HttpClient) {}
 
   public getAll() {
     return this.http.get(`${this.rootUrl}/getAll`);
+  }
+
+  public getAfter(after: number) {
+    return this.http.get(`${this.rootUrl}/getFrom/${after}`);
   }
 }

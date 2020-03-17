@@ -1,3 +1,5 @@
+import logger from './logger';
+
 export default class CyclicBuffer {
   buffer: number[][];
   elementsAdded: number;
@@ -11,6 +13,19 @@ export default class CyclicBuffer {
     this.ptrRead = 0;
     this.ptrWrite = 0;
     this.elementsAdded = 0;
+  }
+
+  public deleteOld(seconds: number) {
+    const cutOff = new Date().getTime() / 1000 - seconds;
+    let cntDeleted = 0;
+
+    while (this.elementsAdded > 0 && this.buffer[this.ptrRead][5] < cutOff) {
+      this.elementsAdded -= 1;
+      this.ptrRead = (this.ptrRead + 1) % this.bufferSize;
+      cntDeleted += 1;
+    }
+
+    logger.info(`Deleted ${cntDeleted} notes older than ${seconds} seconds`);
   }
 
   public addSingle(value: number[]) {

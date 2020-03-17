@@ -1,1 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
+
+.key {
+  width: 100%;
+}
+
+.white {
+  background-color: white;
+  border: 0.5px solid black;
+}
+.black {
+  background-color: black;
+  border: 1px solid black;
+  height: 70%;
+
+  width: 60%;
+  margin-left: 70%;
+}
+
+.pressed {
+  background-color: darkgoldenrod;
+}
