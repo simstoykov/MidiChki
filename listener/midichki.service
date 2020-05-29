@@ -5,7 +5,7 @@ Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
-ExecStart= /home/pi/Documents/Developing/MidiChki/listener/venv37/bin/python /home/pi/Documents/Developing/MidiChki/listener/playing.py
+ExecStart= /home/pi/Developing/MidiChki/listener/venv37/bin/python /home/pi/Developing/MidiChki/listener/playing.py -p Piano
 StandardInput=tty-force
 Restart=on-failure
 
