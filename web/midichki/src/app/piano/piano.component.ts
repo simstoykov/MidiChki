@@ -4,7 +4,7 @@ import * as d3 from "d3";
 @Component({
   selector: "app-piano",
   templateUrl: "./piano.component.html",
-  styleUrls: ["./piano.component.css"]
+  styleUrls: ["./piano.component.css"],
 })
 export class PianoComponent implements OnInit {
   constructor() {}
@@ -73,8 +73,6 @@ export class PianoComponent implements OnInit {
     const whitesToGo =
       this.whiteIndex[rem] * this.WHITE_KEY_PERCENTAGE +
       octaves * this.NOTES_PER_OCTAVE * this.KEY_PERCENTAGE;
-
-    console.log(midiKey + " has " + whitesToGo + " whites to go");
 
     const shouldAdd =
       rem != 0 && this.whiteIndex[rem - 1] == this.whiteIndex[rem];

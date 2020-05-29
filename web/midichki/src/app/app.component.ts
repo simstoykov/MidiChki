@@ -43,6 +43,8 @@ export class AppComponent {
   sideBuffer: DataHolder[] = [];
   releaseIntent = [];
 
+  // TODO: This logic could be made prettier
+
   releaseEvent(frequency: number, afterBufDelay: number, forReal = false) {
     if (this.pedalSustain) {
       // If the pedal is pushed, delay release
@@ -91,6 +93,7 @@ export class AppComponent {
       );
       this.toBeReleased = [];
     } else {
+      console.log("Pedal pressed");
       this.pedalSustain = true;
     }
   }
@@ -122,6 +125,12 @@ export class AppComponent {
       dataHolder.status === 128 ||
       (dataHolder.status == 144 && dataHolder.velocity === 0)
     ) {
+      console.log(
+        "Submitting a realease for frequency " +
+          dataHolder.frequency +
+          " with delay " +
+          afterBufDelay
+      );
       this.releaseEvent(dataHolder.frequency, afterBufDelay);
     } else if (dataHolder.status === 176) {
       this.pedalEvent(dataHolder.velocity, afterBufDelay);
@@ -139,7 +148,10 @@ export class AppComponent {
       this.handleEvent(value);
     }
 
-    if (dataHolder.status === 128) {
+    if (
+      dataHolder.status === 128 ||
+      (dataHolder.status === 144 && dataHolder.velocity === 0)
+    ) {
       // Postpone releasing with RELEASE_PEDAL_DELAY_S seconds
       this.releaseIntent[dataHolder.frequency] = true;
       this.sideBuffer.push(
