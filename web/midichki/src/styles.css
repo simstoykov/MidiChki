@@ -1,7 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
 
-.key {
+body {
+  background-color: black;
+}
+
+h1 {
+  color: rgb(230, 230, 230);
+  text-shadow: 0px 0px 10px grey;
+}
+
+app-piano {
+  /* background-color: lightgray; */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 15px;
   width: 100%;
+}
+
+.key {
+  border-radius: 2px;
+  width: 100%;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .white {
@@ -19,4 +37,18 @@
 
 .pressed {
   background-color: darkgoldenrod;
+}
+
+.elevated {
+  display: flex;
+  justify-content: center;
+  background-color: rgb(20, 20, 20);
+  box-shadow: 8px 8px 8px 8px rgba(0, 0, 0, 0.2),
+    20px 20px 20px 20px rgba(0, 0, 0, 0.19);
+  border-radius: 3px;
+  margin: 10px;
+  padding: 10px;
+}
+
+.flyingnote {
 }

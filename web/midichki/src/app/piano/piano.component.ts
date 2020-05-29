@@ -10,8 +10,12 @@ export class PianoComponent implements OnInit {
   constructor() {}
 
   NOTES_PER_OCTAVE = 12;
-  WHITE_NOTES_PER_OCTAVE = 7;
   NUM_OCTAVES = 8;
+  WHITE_NOTES_PER_OCTAVE = 7;
+  NUM_NOTES = this.NOTES_PER_OCTAVE * this.NUM_OCTAVES;
+
+  KEY_PERCENTAGE = 100 / this.NUM_NOTES;
+  WHITE_KEY_PERCENTAGE = 100 / (this.WHITE_NOTES_PER_OCTAVE * this.NUM_OCTAVES);
 
   LOWEST_C_MIDI = 12;
 
@@ -20,8 +24,9 @@ export class PianoComponent implements OnInit {
   octaveAll = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   octaveAllWeird: string[];
   columnBlack = [1, 2, 4, 5, 6];
+  whiteIndex = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6];
 
-  midiColor: number[][] = new Array(this.NOTES_PER_OCTAVE * this.NUM_OCTAVES);
+  midiColor: number[][] = new Array(this.NUM_NOTES);
 
   repeat<T>(toRepeat: T[], times: number): T[] {
     const ret = Array(times * toRepeat.length);
@@ -57,6 +62,39 @@ export class PianoComponent implements OnInit {
     }
 
     return -1;
+  }
+
+  animateNotePressed(midiKey: number, delay: number, thisColor: string) {
+    const which = midiKey - this.LOWEST_C_MIDI;
+
+    const rem = which % this.NOTES_PER_OCTAVE;
+    const octaves = Math.floor(which / this.NOTES_PER_OCTAVE);
+
+    const whitesToGo =
+      this.whiteIndex[rem] * this.WHITE_KEY_PERCENTAGE +
+      octaves * this.NOTES_PER_OCTAVE * this.KEY_PERCENTAGE;
+
+    console.log(midiKey + " has " + whitesToGo + " whites to go");
+
+    const shouldAdd =
+      rem != 0 && this.whiteIndex[rem - 1] == this.whiteIndex[rem];
+    const toAdd = shouldAdd ? this.WHITE_KEY_PERCENTAGE / 2 : 0;
+
+    const selection = d3
+      .select("#svgholder")
+      .append("circle")
+      .attr("class", "flyingnote")
+      .attr("r", this.KEY_PERCENTAGE / 2 + "%")
+      .attr("cy", "100%")
+      .attr("cx", whitesToGo + this.WHITE_KEY_PERCENTAGE / 2 + toAdd + "%")
+      .attr("fill", thisColor);
+
+    selection
+      .transition()
+      .duration(delay)
+      .ease(d3.easeLinear)
+      .on("end", () => selection.remove())
+      .attr("cy", this.KEY_PERCENTAGE / 2 + "%");
   }
 
   paintIn(midiKey: number, color: string) {
@@ -97,13 +135,13 @@ export class PianoComponent implements OnInit {
       255 - this.randomBetween(255, base + (1 - base) * (velocity / 128));
     const b =
       255 - this.randomBetween(255, base + (1 - base) * (velocity / 128));
+    const thisColor = `rgb(${r},${g},${b})`;
 
     this.midiColor[midiKey] = [r, g, b];
+    const calculatedDelay = (delaySecs - initialToneTime) * 1000;
 
-    setTimeout(
-      () => this.paintIn(midiKey, `rgb(${r},${g},${b})`),
-      (delaySecs - initialToneTime) * 1000
-    );
+    this.animateNotePressed(midiKey, calculatedDelay, thisColor);
+    setTimeout(() => this.paintIn(midiKey, thisColor), calculatedDelay);
   }
 
   halfPressIn(midiKey: number, delaySecs: number, initialToneTime: number) {
@@ -128,7 +166,7 @@ export class PianoComponent implements OnInit {
     this.octaveAllWeird = this.octaveWhite.concat(this.octaveBlack);
 
     d3.select("#piano-container")
-      .selectAll("div")
+      .selectAll(null)
       .data(this.repeat(this.octaveAllWeird, this.NUM_OCTAVES))
       .enter()
       .append("div")

@@ -1,14 +1,30 @@
 .flex-container {
   display: flex;
-  align-items: stretch;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
+
   width: 100%;
+  height: 100%;
 }
 
 .piano-container {
+  flex: 1;
+
   display: grid;
   grid-template-columns: repeat(56, 1fr);
-  background-color: cornsilk;
-  height: 100px;
+  grid-template-rows: 1fr 4fr;
   width: 100%;
+}
+
+.svgholder {
+  grid-area: 2/1/2/57;
+  width: 100%;
+  height: 80%;
+}
+
+.dot {
+  width: 100%;
+  padding-top: 100%;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
 }

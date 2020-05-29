@@ -54,11 +54,16 @@ export default class CyclicBuffer {
   }
 
   public readAll() {
+    console.log(
+      'Reading while there are ' + this.elementsAdded + ' in the buffer'
+    );
     const ret = new Array(this.elementsAdded);
     for (let i = 0; i < this.elementsAdded; i++) {
       const idx = (this.ptrRead + i) % this.bufferSize;
       ret[i] = this.buffer[idx];
     }
+
+    console.log('Result is ' + ret);
 
     return ret;
   }

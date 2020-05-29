@@ -1,22 +1,23 @@
-<div class="globalContainer">
+<div class="globalContainer flexcol">
   <h1>Simi Radio</h1>
 
-  <div *ngIf="!tunedIn" class="horContainer" style="width: 100px;">
-    <button (click)="clickTuneIn()">Tune in!</button>
+  <div *ngIf="!tunedIn" class="horContainer centerStuff">
+    <button class="btn" (click)="clickTuneIn()">Tune in!</button>
   </div>
 
-  <div *ngIf="tunedIn" class="horContainer">
-    <input
-      #inpDelaySecs
-      class="element"
-      type="number"
-      value="{{ bufferDelaySecs }}"
-    />
-    <button (click)="clickChangeDelay(inpDelaySecs.value)" class="element">
-      Set buffer delay (seconds)
-    </button>
-  </div>
-  <div class="horContainer">
-    <app-piano #piano class="fullWidth"> </app-piano>
+  <div *ngIf="tunedIn" class="takeEverything flexcol">
+    <div class="elevated">
+      <input
+        #inpDelaySecs
+        class="element"
+        type="number"
+        value="{{ bufferDelaySecs }}"
+      />
+      <button (click)="clickChangeDelay(inpDelaySecs.value)" class="element">
+        Set buffer delay (seconds)
+      </button>
+    </div>
+
+    <app-piano #piano class="horContainer takeEverything"> </app-piano>
   </div>
 </div>

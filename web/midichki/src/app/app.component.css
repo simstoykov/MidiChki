@@ -1,24 +1,49 @@
-.horContainer {
+.flexcol {
   display: flex;
-  justify-content: center;
-  flex-direction: column;
+  flex-flow: column nowrap;
+}
+
+.globalContainer {
   margin: auto;
+  width: 80%;
+  height: 90vh;
+}
+
+.horContainer {
   width: 100%;
+}
+
+.takeEverything {
+  flex: 1;
 }
 
 .element {
   margin: 2px;
 }
 
-.globalContainer {
-  margin: auto;
-  justify-content: center;
-  width: 80%;
-  display: flex;
-  flex-direction: column;
-  align-self: center;
-}
-
 .fullWidth {
   width: 100%;
+}
+
+.btn {
+  display: block;
+  position: relative;
+  width: 100px;
+  height: 100px;
+
+  background-color: black;
+  color: rgb(200, 200, 200);
+  font-size: medium;
+
+  border-radius: 50%;
+  border: 1px solid grey;
+  box-shadow: 0px 0px 20px 20px rgba(0, 0, 0, 0.2),
+    0px 0px 10px 10px rgba(255, 255, 255, 0.5);
+}
+
+.centerStuff {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  height: 100%;
 }

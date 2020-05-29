@@ -8,7 +8,7 @@ import { PianoComponent } from "./piano/piano.component";
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"]
+  styleUrls: ["./app.component.css"],
 })
 export class AppComponent {
   @ViewChild("piano", { static: false }) childPiano: PianoComponent;
@@ -26,11 +26,11 @@ export class AppComponent {
   fetchedData = null;
   instrument = new Tone.Sampler(
     {
-      A3: "A4.wav"
+      A3: "A4.wav",
     },
     {
       baseUrl: "assets/audio/",
-      release: 1
+      release: 1,
     }
   ).toMaster();
   lastPlayed = new Date().getTime() / 1000 - 10;
@@ -86,7 +86,9 @@ export class AppComponent {
       console.log("Pedal released - releasing all the notes");
 
       this.pedalSustain = false;
-      this.toBeReleased.forEach(note => this.releaseNote(note, afterBufDelay));
+      this.toBeReleased.forEach((note) =>
+        this.releaseNote(note, afterBufDelay)
+      );
       this.toBeReleased = [];
     } else {
       this.pedalSustain = true;
@@ -96,7 +98,7 @@ export class AppComponent {
   handleEvent(dataHolder: DataHolder) {
     const afterBufDelay = dataHolder.delay + this.bufferDelaySecs;
 
-    if (dataHolder.status === 144) {
+    if (dataHolder.status === 144 && dataHolder.velocity > 0) {
       console.log(
         "Attacking frequency " +
           dataHolder.frequency +
@@ -116,7 +118,10 @@ export class AppComponent {
         afterBufDelay,
         Tone.context.now()
       );
-    } else if (dataHolder.status === 128) {
+    } else if (
+      dataHolder.status === 128 ||
+      (dataHolder.status == 144 && dataHolder.velocity === 0)
+    ) {
       this.releaseEvent(dataHolder.frequency, afterBufDelay);
     } else if (dataHolder.status === 176) {
       this.pedalEvent(dataHolder.velocity, afterBufDelay);
@@ -232,6 +237,6 @@ export class AppComponent {
   }
 
   private delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

@@ -28,7 +28,9 @@ app.get('/getFrom/:after', (req, res) => {
   cyclicBuffer.deleteOld(60);
 
   const after = req.params.after;
-  const notes = cyclicBuffer.readAll().filter(val => val[5] > after);
+  const notes = cyclicBuffer.readAll().filter((val) => {
+    return val[5] > after;
+  });
 
   logger.info(`Sending notes after ${after}, size = ${notes.length}`);
   sendResponse(res, notes);
