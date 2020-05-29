@@ -75,28 +75,32 @@ def persist_stuff(strval):
         the_file.write(strval + "\n")
 
 
-upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
-# upload_url = "http://192.168.43.223:8080/postNotes"
+# upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
+upload_url = "http://192.168.0.151:8080/postNotes" # TODO: Make a cli
 def upload_stuff(reads):
     logging.info(f"Uploading {len(reads)} values to {upload_url}")
     logging.info(reads)
     session.post(upload_url, json=reads)
 
 
-def midi_event(read, cur_time):
-    data, timestamp = read
-    status, note, velocity, idk = data
+def midi_events(reads, cur_time):
+    to_upload = []
 
-    if status == 144:
-        handle_note_pressed(note, velocity)
+    for read in reads:
+        data, timestamp = read
+        status, note, velocity, idk = data
 
-    if status != 248: # This is a midi clock which we dislike
-        to_upload = read[0] + [read[1], cur_time]
+        if status == 144:
+            handle_note_pressed(note, velocity)
+
+        if status != 248: # This is a midi clock which we dislike
+            to_upload.append(read[0] + [read[1], cur_time])
+
+            strval = read_to_string(read, cur_time)
+            persist_stuff(strval)
+
+    if len(to_upload) > 0:
         upload_stuff(to_upload)
-
-    strval = read_to_string(read, cur_time)
-    persist_stuff(strval)
-
 
 # Set global state
 lights = [eh.light.yellow, eh.light.blue, eh.light.red, eh.light.green]
@@ -136,6 +140,5 @@ if __name__ == '__main__':
                 last_note_time = cur_time
         else:
             last_note_time = cur_time
-            for read in reads:
-                midi_event(read, cur_time)
+            midi_events(reads, cur_time)
 
