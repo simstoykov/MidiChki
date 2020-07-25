@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Output, EventEmitter } from "@angular/core";
 import * as d3 from "d3";
 
 @Component({
@@ -7,6 +7,8 @@ import * as d3 from "d3";
   styleUrls: ["./piano.component.css"],
 })
 export class PianoComponent implements OnInit {
+  @Output() onPianoKeyClick = new EventEmitter<number>();
+
   constructor() {}
 
   NOTES_PER_OCTAVE = 12;
@@ -27,6 +29,31 @@ export class PianoComponent implements OnInit {
   whiteIndex = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6];
 
   midiColor: number[][] = new Array(this.NUM_NOTES);
+
+  mapOctaveIndexToMidi = {
+    0: 0,
+    1: 2,
+    2: 4,
+    3: 5,
+    4: 7,
+    5: 9,
+    6: 11,
+
+    7: 1,
+    8: 3,
+    9: 6,
+    10: 8,
+    11: 10,
+  };
+
+  indexToMidiNote(index: number): number {
+    const octave = Math.floor(index / 12);
+    const octaveIndex = index % 12;
+    return (
+      (octave + 1) * this.NOTES_PER_OCTAVE +
+      this.mapOctaveIndexToMidi[octaveIndex]
+    );
+  }
 
   repeat<T>(toRepeat: T[], times: number): T[] {
     const ret = Array(times * toRepeat.length);
@@ -95,7 +122,8 @@ export class PianoComponent implements OnInit {
       .attr("cy", this.KEY_PERCENTAGE / 2 + "%");
   }
 
-  paintIn(midiKey: number, color: string) {
+  paintPianoKeyIn(midiKey: number, color: string) {
+    console.log("Painting painting painting");
     const octave = Math.floor(
       (midiKey - this.LOWEST_C_MIDI) / this.NOTES_PER_OCTAVE
     );
@@ -139,7 +167,7 @@ export class PianoComponent implements OnInit {
     const calculatedDelay = (delaySecs - initialToneTime) * 1000;
 
     this.animateNotePressed(midiKey, calculatedDelay, thisColor);
-    setTimeout(() => this.paintIn(midiKey, thisColor), calculatedDelay);
+    setTimeout(() => this.paintPianoKeyIn(midiKey, thisColor), calculatedDelay);
   }
 
   halfPressIn(midiKey: number, delaySecs: number, initialToneTime: number) {
@@ -148,14 +176,14 @@ export class PianoComponent implements OnInit {
     const b = Math.min(255, this.midiColor[midiKey][2] * 1.2);
 
     setTimeout(
-      () => this.paintIn(midiKey, `rgb(${r},${g},${b})`),
+      () => this.paintPianoKeyIn(midiKey, `rgb(${r},${g},${b})`),
       (delaySecs - initialToneTime) * 1000
     );
   }
 
   unPressIn(midiKey: number, delaySecs: number, initialToneTime: number) {
     setTimeout(
-      () => this.paintIn(midiKey, null),
+      () => this.paintPianoKeyIn(midiKey, null),
       (delaySecs - initialToneTime) * 1000
     );
   }
@@ -177,6 +205,14 @@ export class PianoComponent implements OnInit {
       })
       .attr("style", (data: string, index: number) => {
         return this.getGridStyle(index);
+      })
+      .on("click", (data: string, index: number) => {
+        const whichMidi = this.indexToMidiNote(index);
+        console.log(
+          `Button pressed:\ndata: ${data}\nindex: ${index}\nmidi: ${whichMidi}`
+        );
+
+        this.onPianoKeyClick.emit(whichMidi);
       });
   }
 }

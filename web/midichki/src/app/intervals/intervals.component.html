@@ -1,0 +1,48 @@
+<div class="globalContainer flexcol">
+  <div class="elevated">
+    <div class="element">
+      <label for="intervals">Interval: </label>
+      <select
+        #intervals
+        name="intervals"
+        id="intervals"
+        (change)="intervalChanged($event)"
+      >
+        <option value="0">Unison</option>
+        <option value="1">Second (small)</option>
+        <option value="2">Second (big)</option>
+        <option value="3">Third (small)</option>
+        <option value="4">Third (big)</option>
+        <option value="5">Fourth</option>
+        <option value="6">Tritone</option>
+        <option value="7">Fifth</option>
+        <option value="8">Sixth (small)</option>
+        <option value="9">Sixth (big)</option>
+        <option value="10">Seventh (small)</option>
+        <option value="11">Seventh (big)</option>
+        <option value="12">Octave</option>
+      </select>
+    </div>
+
+    <div class="element">
+      <label for="direction">Direction: </label>
+      <select
+        #direction
+        name="direction"
+        id="direction"
+        (change)="directionChanged($event)"
+      >
+        <option value="both">Both</option>
+        <option value="up">Up</option>
+        <option value="down">Down</option>
+      </select>
+    </div>
+  </div>
+
+  <app-piano
+    (onPianoKeyClick)="onPianoKeyClick($event)"
+    #piano
+    class="horContainer takeEverything"
+  >
+  </app-piano>
+</div>

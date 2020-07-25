@@ -52,3 +52,110 @@ app-piano {
 
 .flyingnote {
 }
+
+.flexcol {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.globalContainer {
+  margin: auto;
+  width: 80%;
+  height: 90vh;
+}
+
+.horContainer {
+  width: 100%;
+}
+
+.takeEverything {
+  flex: 1;
+}
+
+.element {
+  margin: 2px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.btn {
+  display: block;
+  position: relative;
+  width: 100px;
+  height: 100px;
+
+  background-color: black;
+  color: rgb(200, 200, 200);
+  font-size: medium;
+
+  border-radius: 50%;
+  border: 1px solid grey;
+  box-shadow: 0px 0px 20px 20px rgba(0, 0, 0, 0.2),
+    0px 0px 10px 10px rgba(255, 255, 255, 0.5);
+}
+
+.centerStuff {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  height: 100%;
+}
+
+.flex-container {
+  display: flex;
+  flex-flow: column nowrap;
+
+  width: 100%;
+  height: 100%;
+}
+
+.piano-container {
+  flex: 1;
+
+  display: grid;
+  grid-template-columns: repeat(56, 1fr);
+  grid-template-rows: 1fr 4fr;
+  width: 100%;
+}
+
+.svgholder {
+  grid-area: 2/1/2/57;
+  width: 100%;
+  height: 80%;
+}
+
+.dot {
+  width: 100%;
+  padding-top: 100%;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+nav {
+  margin: 50px;
+  border-radius: 5px;
+  padding: 10px;
+  border: 0.5px solid rgba(50, 50, 50);
+  /* box-shadow: 0px 0px 10px 10px rgba(0, 0, 0, 0.2), 0px 0px 5px 5px rgba(255, 255, 255, 0.5); */
+}
+
+.nave {
+  text-decoration: none;
+  color: #bbb;
+  background-color: rgb(20, 20, 20);
+
+  padding: 5px;
+  margin: 20px;
+  /* background-color: black; */
+  /* border: 0.5px solid rgba(50, 50, 50); */
+  border-radius: 6px;
+  width: 100%;
+  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+}
+
+label {
+  color: white;
+}

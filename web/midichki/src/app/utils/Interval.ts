@@ -1,0 +1,15 @@
+export enum Interval {
+  unison = 0,
+  secondSmall,
+  secondBig,
+  thirdSmall,
+  thirdBig,
+  fourth,
+  tritone,
+  fifth,
+  sixthSmall,
+  sixthBig,
+  seventhSmall,
+  seventhBig,
+  octave,
+}

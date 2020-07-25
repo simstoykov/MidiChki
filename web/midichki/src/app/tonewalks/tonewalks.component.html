@@ -1,0 +1,25 @@
+<div class="globalContainer flexcol">
+  <!-- <h1 ng-style="{{visibility}}">Interval: {{ currentIntervalStr }}</h1> -->
+
+  <div *ngIf="maxInterval" class="elevated">
+    <input
+      value="{{ maxInterval }}"
+      #maxIntervalSeconds
+      class="element"
+      type="number"
+    />
+    <button
+      (click)="clickUpdateMaxSeconds(maxIntervalSeconds.value)"
+      class="element"
+    >
+      Set maximum difference in small seconds
+    </button>
+  </div>
+
+  <app-piano
+    (onPianoKeyClick)="onPianoKeyClick($event)"
+    #piano
+    class="horContainer takeEverything"
+  >
+  </app-piano>
+</div>

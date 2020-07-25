@@ -1,23 +1,7 @@
-<div class="globalContainer flexcol">
-  <h1>Simi Radio</h1>
-
-  <div *ngIf="!tunedIn" class="horContainer centerStuff">
-    <button class="btn" (click)="clickTuneIn()">Tune in!</button>
-  </div>
-
-  <div *ngIf="tunedIn" class="takeEverything flexcol">
-    <div class="elevated">
-      <input
-        #inpDelaySecs
-        class="element"
-        type="number"
-        value="{{ bufferDelaySecs }}"
-      />
-      <button (click)="clickChangeDelay(inpDelaySecs.value)" class="element">
-        Set buffer delay (seconds)
-      </button>
-    </div>
-
-    <app-piano #piano class="horContainer takeEverything"> </app-piano>
-  </div>
-</div>
+<h1>Simeon's music projects</h1>
+<nav id="nav">
+  <a class="nave" routerLink="/radio">Radio</a>
+  <a class="nave" routerLink="/intervals">Fixed intervals trainer</a>
+  <a class="nave" routerLink="/tonewalks">Tone walks</a>
+</nav>
+<router-outlet></router-outlet>
