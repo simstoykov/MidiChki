@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
 import logging
+from dataclasses import dataclass
+
 
 logging.basicConfig(level=logging.INFO)
+
+
+def random_between(start, to):
+    return int(start + random() * (to - start))
+
+
 
 class NotesObserver(ABC):
     def __init__(self, name):
@@ -18,4 +26,9 @@ class NotesObserver(ABC):
     def taram(self, notes):
         pass
 
+
+@dataclass
+class MidiNote():
+    note: int,
+    velocity: int
 
