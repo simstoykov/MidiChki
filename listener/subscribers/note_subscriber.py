@@ -1,23 +1,17 @@
 from abc import ABC, abstractmethod
 import logging
-from dataclasses import dataclass
 
 
 logging.basicConfig(level=logging.INFO)
 
-
-def random_between(start, to):
-    return int(start + random() * (to - start))
-
-
-
-class NotesObserver(ABC):
+class NotesSubscriber(ABC):
     def __init__(self, name):
         self.name = name
-        logging.info(f'Observer {self.name} initialized')
+        logging.info(f'Subscriber {self.name} initialized')
 
     def start(self, q):
-        logging.info(f'Observer {self.name} starting...')
+        """Entry point for subscriber"""
+        logging.info(f'Subscriber {self.name} starting...')
         while True:
             notes = q.get(block=True)
             self.taram(notes)
@@ -25,10 +19,4 @@ class NotesObserver(ABC):
     @abstractmethod
     def taram(self, notes):
         pass
-
-
-@dataclass
-class MidiNote():
-    note: int,
-    velocity: int
 

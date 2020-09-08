@@ -5,19 +5,13 @@ import pygame.midi
 import argparse
 
 from random import random
-from concurrent.futures import ThreadPoolExecutor
-from requests_futures.sessions import FuturesSession
 
-from multiprocessing import Queue
-import multiprocessing as mp
+import subscribers
+from utils.classes import MidiNote
+
 
 # from simple_lights import SimpleLights
-
-session = FuturesSession(executor=ThreadPoolExecutor(max_workers=3))
 logging.basicConfig(level=logging.INFO)
-
-note_observers = [] # [SimpleLights()]
-observer_queues = [] # Is initialised in __main__
 
 
 def find_piano_id(device_name):
@@ -68,17 +62,8 @@ def persist_stuff(strval):
 # upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
 # upload_url = "http://192.168.0.151:8080/postNotes"
 
-UPLOAD_ENDPOINT = 'postNotes'
-upload_dest = None # Should be set on initialization
-def upload_stuff(reads):
-    upload_url = f'{upload_dest}/{UPLOAD_ENDPOINT}'
 
-    logging.info(f"Uploading {len(reads)} values to {upload_url}")
-    logging.info(reads)
-    session.post(upload_url, json=reads)
-
-
-def midi_events(reads, cur_time):
+def midi_events(reads, cur_time, subscriber_queues):
     to_upload = []
 
     for read in reads:
@@ -86,17 +71,13 @@ def midi_events(reads, cur_time):
         status, note, velocity, idk = data
 
         if status != 248: # This is a midi clock which we dislike
-            to_upload.append(read[0] + [read[1], cur_time])
+            note = MidiNote(read[0][1], read[0][2], read[0][0], read[1])
 
             strval = read_to_string(read, cur_time)
-            persist_stuff(strval)
+            # persist_stuff(strval)
 
-            for q in observer_queues:
-                q.put(read[0] + [read[1], cur_time])
-    if len(to_upload) > 0:
-        upload_stuff(to_upload)
-
-
+            for q in subscriber_queues:
+                q.put(note)
 
 
 if __name__ == '__main__':
@@ -110,13 +91,9 @@ if __name__ == '__main__':
     device_name = args.piano
     upload_dest = args.upload
 
-    piano = wait_for_piano(device_name)
+    subscriber_queues = subscribers.enable_subscribers()
 
-    for obs in note_observers:
-        q = mp.Queue()
-        observer_queues.append(q)
-        p = mp.Process(target=obs.start, args=(q,))
-        p.start()
+    piano = wait_for_piano(device_name)
 
     logging.info("Indefinitely listening for notes...")
     last_note_time = time.time()
@@ -140,5 +117,5 @@ if __name__ == '__main__':
                 last_note_time = cur_time
         else:
             last_note_time = cur_time
-            midi_events(reads, cur_time)
+            midi_events(reads, cur_time, subscriber_queues)
 
