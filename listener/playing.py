@@ -10,7 +10,6 @@ import subscribers
 from utils.classes import MidiNote
 
 
-# from simple_lights import SimpleLights
 logging.basicConfig(level=logging.INFO)
 
 
@@ -48,21 +47,6 @@ def wait_for_piano(device_name):
     return pygame.midi.Input(piano_id)
 
 
-def read_to_string(read, cur_time):
-    return f"{read[0][0]},{read[0][1]},{read[0][2]},{read[0][3]},{read[1]},{cur_time}"
-
-
-# write_path = "/media/pi/SS Backup/midichki/simefile.txt"
-write_path = "/home/pi/Developing/MidiChki/dontgitit/simefile.txt" # TODO: Make a cli argument
-def persist_stuff(strval):
-    with open(write_path, 'a+') as the_file:
-        the_file.write(strval + "\n")
-
-
-# upload_url = "https://mighty-island-21925.herokuapp.com/postNotes"
-# upload_url = "http://192.168.0.151:8080/postNotes"
-
-
 def midi_events(reads, cur_time, subscriber_queues):
     to_upload = []
 
@@ -73,9 +57,6 @@ def midi_events(reads, cur_time, subscriber_queues):
         if status != 248: # This is a midi clock which we dislike
             note = MidiNote(read[0][1], read[0][2], read[0][0], read[1])
 
-            strval = read_to_string(read, cur_time)
-            # persist_stuff(strval)
-
             for q in subscriber_queues:
                 q.put(note)
 
@@ -85,22 +66,23 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Stream Midichki to the server')
     parser.add_argument('-p', '--piano', required=True)
-    parser.add_argument('-u', '--upload', required=True)
+
+    subscribers.note_subscriber.prepare_args(parser)
+
     args = parser.parse_args()
 
+    subscribers.note_subscriber.process_args(parser)
+
     device_name = args.piano
-    upload_dest = args.upload
+    piano = wait_for_piano(device_name)
 
     subscriber_queues = subscribers.enable_subscribers()
-
-    piano = wait_for_piano(device_name)
 
     logging.info("Indefinitely listening for notes...")
     last_note_time = time.time()
     while True:
         reads = piano.read(100)
         time.sleep(0.05) # in seconds
-        logging.info(f"Read {len(reads)} stuff")
 
         cur_time = time.time()
 
@@ -118,4 +100,3 @@ if __name__ == '__main__':
         else:
             last_note_time = cur_time
             midi_events(reads, cur_time, subscriber_queues)
-

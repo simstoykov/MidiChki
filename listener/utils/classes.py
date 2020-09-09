@@ -7,3 +7,9 @@ class MidiNote():
     velocity: int
     status: int
     delay: int
+
+
+@dataclass
+class Param():
+    tag: str
+    long: str

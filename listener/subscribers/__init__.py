@@ -3,11 +3,16 @@ import multiprocessing as mp
 
 from subscribers.echo import Echo
 from subscribers.uploader import Uploader
+from subscribers.persistor import Persistor
 
+note_subscribers = [
+    # Echo(),
+    Uploader(), 
+    # Persistor(),
+]
 
 def enable_subscribers():
-    note_subscribers = [Echo(), Uploader()]
-    subscriber_queues = [] # Is initialised in __main__
+    subscriber_queues = []
 
     for obs in note_subscribers:
         q = mp.Queue()
