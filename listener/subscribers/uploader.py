@@ -8,7 +8,6 @@ from utils.classes import MidiNote, Param
 from time import time, sleep
 
 import logging
-import threading
 
 logging.basicConfig(level="INFO")
 
@@ -22,7 +21,6 @@ TO_SLEEP = 0.3
 session = FuturesSession(executor=ThreadPoolExecutor(max_workers=3))
 
 def upload_stuff(reads, upload_url):
-    
     if len(reads) == 0:
         return
     
@@ -38,21 +36,15 @@ class Uploader(NotesSubscriber):
     def __init__(self):
         super().__init__('Uploader', PARAMS)
         
-        self.red_queue = []
-        self.green_queue = []
-        self.queues = [self.red_queue, self.green_queue]
+        red_queue = []
+        green_queue = []
+        self.queues = [red_queue, green_queue]
         self.active_index = 0
 
-        self.t = threading.Thread(name='Daemon uploader', target=self._aggregator_upload)
-        self.t.setDaemon(True)
-        self.thread_started = False
+        self.run_in_new_thread("uploader", self._aggregator_upload)
 
 
     def taram(self, note: MidiNote):
-        if not self.thread_started:
-            self.t.start()
-            self.thread_started = True
-        
         read = note_to_weird(note)
         to_upload = self.queues[self.active_index]
         to_upload.append(read)

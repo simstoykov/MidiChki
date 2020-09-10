@@ -3,6 +3,7 @@ import logging
 
 from typing import List
 from utils.classes import Param
+import threading
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,6 +31,9 @@ class NotesSubscriber(ABC):
 
         if params is not None:
             all_params_needed += params
+        
+        self.threads_started = False
+        self.threads_list = []
 
         logging.info(f'Subscriber {self.name} initialized')
 
@@ -38,10 +42,26 @@ class NotesSubscriber(ABC):
         logging.info(f'Subscriber {self.name} starting...')
         while True:
             notes = q.get(block=True)
-            self.taram(notes)
+            self._note_arrived(notes)
 
     def get_parameter(self, param: Param):
         return params_map[param.tag]
+    
+    def run_in_new_thread(self, identifier, target, *args, **kwargs):
+        to_run = lambda: target(*args, **kwargs)
+        name = f'Subscriber {self.name}, thread {identifier}'
+
+        t = threading.Thread(name=name, target=to_run)
+        t.setDaemon(True)
+        self.threads_list.append(t)
+
+    def _note_arrived(self, notes):
+        if not self.threads_started:
+            for t in self.threads_list:
+                t.start()
+            self.threads_started = True
+        
+        self.taram(notes)
 
     @abstractmethod
     def taram(self, notes):

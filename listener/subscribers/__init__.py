@@ -15,7 +15,7 @@ note_subscribers = [
     # Echo(),
     # Uploader(), 
     # Persistor(),
-    ChordGuesser()
+    ChordGuesser(),
 ]
 
 def enable_subscribers():

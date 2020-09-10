@@ -82,7 +82,7 @@ if __name__ == '__main__':
     last_note_time = time.time()
     while True:
         reads = piano.read(100)
-        time.sleep(0.05) # in seconds
+        time.sleep(0.2) # in seconds
 
         cur_time = time.time()
 
