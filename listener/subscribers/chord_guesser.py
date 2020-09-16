@@ -18,41 +18,10 @@ logging.basicConfig(level="INFO")
 
 STATUS_LIFT = 128
 STATUS_PRESS = 144
-
-PEDAL_PRESS = 176
+STATUS_PEDAL_PRESS = 176
 
 
 SEQ = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-ALTERNATIVES = {
-    'A#': 'Bb',
-    'C#': 'Db',
-    'D#': 'Eb',
-    'F#': 'Gb',
-    'G#': 'Ab',
-}
-
-
-def get_all_possibilities(pressed: List[str]):
-    if len(pressed) == 0:
-        yield []
-        return
-    
-    note = pressed[0]
-    alternative = ALTERNATIVES.get(note)
-
-    for suffix in get_all_possibilities(pressed[1:]):
-        yield [note] + suffix
-        if alternative is not None:
-            yield [alternative] + suffix
-
-
-def get_all_chords(pressed: List[str]):
-    gathered = []
-
-    for option in get_all_possibilities(pressed):
-        gathered += chords.determine(option)
-    
-    return gathered
 
 
 def midi_to_str(midi_note):
@@ -60,16 +29,19 @@ def midi_to_str(midi_note):
     octave = (midi_note - 12) // 12
     return SEQ[idx], SEQ[idx] + str(octave)
 
+# TODO: Precompute values for all ~5-note possibilities (module ~3 octaves so ~36 noes) to gain speed
+
 
 def get_raw_key(pressed):
     if len(pressed) == 0:
         return
-    
+
     stream = music21.stream.Stream()
 
     for p in pressed:
         stream.append(music21.note.Note(p))
 
+    logging.info("Really analyzing...")
     verdict = stream.analyze('key')
     return verdict
 
@@ -79,7 +51,7 @@ def sample(of, fraction=0.5):
     for item in of:
         if random.random() <= fraction:
             res.append(item)
-    
+
     return res
 
 
@@ -104,7 +76,7 @@ def get_resampled_key(pressed, resample=3, fraction=0.8):
         if val > mx_val:
             mx_val = val
             mx_key = key
-    
+
     print(f"Chose key {mx_key} for {pressed}")
     return mx_key
 
@@ -119,7 +91,6 @@ class ChordGuesser(NotesSubscriber):
         self.events = 0
         self.run_in_new_thread('periodic guesser', self.guess_chords)
 
-
     def taram(self, note: MidiNote):
         self.events += 1
 
@@ -132,7 +103,7 @@ class ChordGuesser(NotesSubscriber):
                 self.pressed.remove(note_full)
             else:
                 self.hold.append(note_full)
-        elif note.status == PEDAL_PRESS:
+        elif note.status == STATUS_PEDAL_PRESS:
             if note.velocity > 0:
                 self.pedal_holds = True
             else:
@@ -140,7 +111,6 @@ class ChordGuesser(NotesSubscriber):
                     self.pressed.remove(to_rem)
                 self.hold = []
                 self.pedal_holds = False
-
 
     def guess_chords(self):
         while True:
@@ -150,7 +120,7 @@ class ChordGuesser(NotesSubscriber):
                 continue
             else:
                 self.events = 0
-            
+
+            logging.info("Guessing chords...")
             copied = copy.deepcopy(self.pressed)
             get_resampled_key(copied)
-
